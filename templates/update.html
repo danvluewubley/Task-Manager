@@ -30,10 +30,10 @@
     
     <tr>
       <td>{{ tasks.id }}</td>
-      <td><a href="{{ url_for('task_update', id=id) }}"><strong>{{ tasks.task }}</strong></a> </td>
+      <td><a href="{{ url_for('update', id=id) }}"><strong>{{ tasks.task }}</strong></a> </td>
       <td>{{ tasks.description }}</td>
       <td>{{ tasks.priority }}</td>
-      <td><a href="{{ url_for('task_update', id=id) }}">🗑️</a> </td>
+      <td><a href="{{ url_for('update', id=id) }}">🗑️</a> </td>
     </tr>
   
     {% endfor %}
@@ -43,7 +43,7 @@
   <h1>Update Task...</h1>
   <br/>
 <div class="shadow p-3 mb-5 bg-white rounded">
-  <form action="/task/update/{{ task_to_update.id }}" method="POST">
+  <form action="/update/{{ task_to_update.id }}" method="POST">
     {{ form.hidden_tag() }}
 
     {{ form.task.label(class="form-label") }}
@@ -63,7 +63,7 @@
 
     {{ form.submit(class="btn btn-success") }}
 
-    <a href="{{ url_for('task_delete', id=id) }}", class="btn btn-danger">🗑️</a>
+    <a href="{{ url_for('delete', id=id) }}", class="btn btn-danger">🗑️</a>
 
 
   </form>

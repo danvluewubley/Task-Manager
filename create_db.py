@@ -1,8 +1,8 @@
 import mysql.connector
 import os
-from dotenv import load_dotenv
+import dotenv
 
-load_dotenv()
+dotenv()
 
 mydb = mysql.connector.connect(
   host="localhost",

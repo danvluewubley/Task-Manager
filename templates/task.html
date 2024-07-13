@@ -30,10 +30,10 @@
     
     <tr>
       <td>{{ tasks.id }}</td>
-      <td><a href="{{ url_for('task_update', id=tasks.id) }}"><strong>{{ tasks.task }}</strong></a> </td>
+      <td><a href="{{ url_for('update', id=tasks.id) }}"><strong>{{ tasks.task }}</strong></a> </td>
       <td>{{ tasks.description }}</td>
       <td>{{ tasks.priority }}</td>
-      <td><a href="{{ url_for('task_delete', id=tasks.id) }}"><strong>🗑️</strong></a> </td>
+      <td><a href="{{ url_for('delete', id=tasks.id) }}"><strong>🗑️</strong></a> </td>
     </tr>
 
     {% endfor %}
@@ -80,10 +80,10 @@
   
   <tr>
     <td>{{ tasks.id }}</td>
-    <td><a href="{{ url_for('task_update', id=tasks.id) }}"><strong>{{ tasks.task }}</strong></a> </td>
+    <td><a href="{{ url_for('update', id=tasks.id) }}"><strong>{{ tasks.task }}</strong></a> </td>
     <td>{{ tasks.description }}</td>
     <td>{{ tasks.priority }}</td>
-    <td><a href="{{ url_for('task_delete', id=tasks.id) }}"><strong>🗑️</strong></a> </td>
+    <td><a href="{{ url_for('delete', id=tasks.id) }}"><strong>🗑️</strong></a> </td>
   </tr>
 
   {% endfor %}
