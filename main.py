@@ -5,15 +5,10 @@ from wtforms.validators import DataRequired, Email
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-
 from datetime import datetime
-
 import os
 from dotenv import load_dotenv
-
-
 load_dotenv()
-
 # Create a Flask Instance
 app = Flask(__name__)
 app.app_context().push()
@@ -26,7 +21,6 @@ app.config['SQLALCHEMY_BINDS'] = {
 
 # Secret Key!
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
-
 # Initialize the Database
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -39,11 +33,10 @@ class Tasks(db.Model):
   description = db.Column(db.String(200), nullable=False)
   priority = db.Column(db.Unicode(100), nullable=False)
   date_added = db.Column(db.DateTime, default=datetime.utcnow)
-
   # Create A String
   def __repr__(self):
     return '<Task %r>' % self.task
-  
+
 # Create a Task Create Form
 class AddTaskForm(FlaskForm):
   task = StringField("Name of Task", validators=[DataRequired()])
@@ -69,7 +62,7 @@ class Users(db.Model):
   # Create A String
   def __repr__(self):
     return '<Users %r>' % self.user
-  
+
 # Create a User Form Class
 class AddUserForm(FlaskForm):
   __bind_key__ = 'users'
@@ -152,7 +145,6 @@ def task_delete(id):
       task = task,
       form = form,
       our_tasks=our_tasks)
-
   except:
     flash("Whoops! There was a problem deleting task, try again...")
     return render_template('task.html',
@@ -179,7 +171,7 @@ def add_user():
     db.session.commit()
 
     flash("User Added Successfully!")
-    
+
   our_users=Users.query.order_by(Users.date_added)
   return render_template('user.html',
     user = user,
@@ -241,12 +233,10 @@ def user_delete(id):
 @app.route('/')
 def index():
   return render_template('index.html')
-
 # Invalid URL
 @app.errorhandler(404)
 def page_not_found(e):
   return render_template('404.html')
-
 # Internal Server Error
 @app.errorhandler(500)
 def page_not_found(e):
