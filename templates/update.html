@@ -14,7 +14,7 @@
 {% endfor %}
 
 {% if task %}
-  <h1>Task Added!</h1>
+  <h1>Update Task!</h1>
   <br/><br/><br/>
   <table class="table table-hover table-bordered table-striped">
 
@@ -25,70 +25,50 @@
       <th>Priority</th>
       <th>Delete</th>
     </tr>
-
+  
     {% for tasks in our_tasks %}
     
     <tr>
       <td>{{ tasks.id }}</td>
-      <td><a href="{{ url_for('update', id=tasks.id) }}"><strong>{{ tasks.task }}</strong></a> </td>
+      <td><a href="{{ url_for('update', id=id) }}"><strong>{{ tasks.task }}</strong></a> </td>
       <td>{{ tasks.description }}</td>
       <td>{{ tasks.priority }}</td>
-      <td><a href="{{ url_for('delete', id=tasks.id) }}"><strong>🗑️</strong></a> </td>
+      <td><a href="{{ url_for('update', id=id) }}">🗑️</a> </td>
     </tr>
-
+  
     {% endfor %}
   
   </table>
 {% else %}
-  <h1>Name your task</h1>
+  <h1>Update Task...</h1>
   <br/>
 <div class="shadow p-3 mb-5 bg-white rounded">
-  <form method="POST">
+  <form action="/update/{{ task_to_update.id }}" method="POST">
     {{ form.hidden_tag() }}
 
     {{ form.task.label(class="form-label") }}
-    {{ form.task(class="form-control") }}
+    {{ form.task(class="form-control", value=task_to_update.task) }}
     
     <br/>
 
     {{ form.description.label(class="form-label") }}
-    {{ form.description(class="form-control") }}
-
-    <br/>
-
-    {{ form.priority.label(class="form-label") }}
-    {{ form.priority(class="form-control") }}
+    {{ form.description(class="form-control", value=task_to_update.description) }}
     
     <br/>
 
-    {{ form.submit(class="btn btn-secondary") }}
+    {{ form.priority.label(class="form-label") }}
+    {{ form.priority(class="form-control", value=task_to_update.priority) }}
+    
+    <br/>
+
+    {{ form.submit(class="btn btn-success") }}
+
+    <a href="{{ url_for('delete', id=id) }}", class="btn btn-danger">🗑️</a>
+
 
   </form>
 </div>
 <br/><br/><br/>
-<table class="table table-hover table-bordered table-striped">
-
-  <tr>
-    <th>ID</th>
-    <th>Task Name</th>
-    <th>Task Description</th>
-    <th>Priority</th>
-    <th>Delete</th>
-  </tr>
-
-  {% for tasks in our_tasks %}
-  
-  <tr>
-    <td>{{ tasks.id }}</td>
-    <td><a href="{{ url_for('update', id=tasks.id) }}"><strong>{{ tasks.task }}</strong></a> </td>
-    <td>{{ tasks.description }}</td>
-    <td>{{ tasks.priority }}</td>
-    <td><a href="{{ url_for('delete', id=tasks.id) }}"><strong>🗑️</strong></a> </td>
-  </tr>
-
-  {% endfor %}
-
-</table>
 
 {% endif %}
 
