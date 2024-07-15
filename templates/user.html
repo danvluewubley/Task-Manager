@@ -20,8 +20,9 @@
 
     <tr>
       <th>ID</th>
-      <th>User</th>
+      <th>Name</th>
       <th>Email</th>
+      <th>Password</th>
       <th>Delete</th>
     </tr>
 
@@ -29,8 +30,9 @@
     
     <tr>
       <td>{{ users.id }}</td>
-      <td><a href="{{ url_for('user_update', id=users.id) }}"><strong>{{ users.user }}</strong></a> </td>
-      <td>{{ user.email }}</td>
+      <td><a href="{{ url_for('user_update', id=users.id) }}"><strong>{{ users.name }}</strong></a> </td>
+      <td>{{ users.email }}</td>
+      <td>{{ users.password_hash }}</td>
       <td><a href="{{ url_for('user_delete', id=users.id) }}"><strong>🗑️</strong></a> </td>
     </tr>
 
@@ -44,14 +46,24 @@
 <div class="shadow p-3 mb-5 bg-white rounded">
   <form method="POST">
     {{ form.hidden_tag() }}
+  
+    {{ form.name.label(class="form-label") }}
+    {{ form.name(class="form-control") }}
 
-    {{ form.user.label(class="form-label") }}
-    {{ form.user(class="form-control") }}
-    
     <br/>
 
     {{ form.email.label(class="form-label") }}
     {{ form.email(class="form-control") }}
+    
+    <br/>
+
+    {{ form.password_hash.label(class="form-label") }}
+    {{ form.password_hash(class="form-control") }}
+    
+    <br/>
+
+    {{ form.password_hash2.label(class="form-label") }}
+    {{ form.password_hash2(class="form-control") }}
     
     <br/>
 
@@ -64,8 +76,9 @@
 
   <tr>
     <th>ID</th>
-    <th>User</th>
+    <th>Name</th>
     <th>Email</th>
+    <th>Password</th>
     <th>Delete</th>
   </tr>
 
@@ -73,8 +86,9 @@
   
   <tr>
     <td>{{ users.id }}</td>
-    <td><a href="{{ url_for('user_update', id=users.id) }}"><strong>{{ users.user }}</strong></a> </td>
+    <td><a href="{{ url_for('user_update', id=users.id) }}"><strong>{{ users.name }}</strong></a> </td>
     <td>{{ users.email }}</td>
+    <td>{{ users.password_hash }}</td>
     <td><a href="{{ url_for('user_delete', id=users.id) }}"><strong>🗑️</strong></a> </td>
   </tr> 
 

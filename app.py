@@ -1,8 +1,9 @@
 from flask import Flask, render_template, flash, request
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField
+from wtforms import StringField, SubmitField, SelectField, DateField, PasswordField
 from wtforms.validators import DataRequired, Email
-
+from werkzeug.security import generate_password_hash, check_password_hash
+from wtforms.validators import DataRequired, Email, EqualTo, Length
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime
@@ -15,9 +16,6 @@ app.app_context().push()
 
 # Add Database
 app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://root:{os.getenv("SQL_PASSWORD")}@localhost/tasks'
-app.config['SQLALCHEMY_BINDS'] = {
-  'users': f'mysql+pymysql://root:{os.getenv("SQL_PASSWORD")}@localhost/users'
-  }
 
 # Secret Key!
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
@@ -32,6 +30,7 @@ class Tasks(db.Model):
   task = db.Column(db.String(100), nullable=False)
   description = db.Column(db.String(200), nullable=False)
   priority = db.Column(db.Unicode(100), nullable=False)
+  due_date = db.Column(db.String(100), nullable=False)
   date_added = db.Column(db.DateTime, default=datetime.utcnow)
   # Create A String
   def __repr__(self):
@@ -42,6 +41,7 @@ class AddTaskForm(FlaskForm):
   task = StringField("Name of Task", validators=[DataRequired()])
   description = StringField("Description of Task", validators=[DataRequired()])
   priority = SelectField("Priority of Task", choices=[('High', 'High'), ('Medium', 'Medium'), ('Low', 'Low')], validators=[DataRequired()])
+  due_date = DateField("Due Date of Task")
   submit = SubmitField("Submit")
 
 # Create an Task Update Form
@@ -49,15 +49,29 @@ class UpdateTaskForm(FlaskForm):
   task = StringField("Edit Task", validators=[DataRequired()])
   description = StringField("Edit Description", validators=[DataRequired()])
   priority = SelectField("Priority of Task", choices=[('High', 'High'), ('Medium', 'Medium'), ('Low', 'Low')], validators=[DataRequired()])
+  due_date = DateField("Due Date of Task")
   submit = SubmitField("Submit")
 
 # Create User Model
 class Users(db.Model):
-  __bind_key__ = 'users'
   id = db.Column(db.Integer, primary_key=True)
-  user = db.Column(db.String(100), nullable=False)
+  name = db.Column(db.String(100), nullable=False)
   email = db.Column(db.String(200), nullable=False, unique=True)
   date_added = db.Column(db.DateTime, default=datetime.utcnow)
+
+  # Password Hashing
+  password_hash = db.Column(db.String(128))
+
+  @property
+  def password(self):
+    raise AttributeError('Password is not a readable attribute!')
+  
+  @password.setter
+  def password(self, password):
+    self.password_hash = generate_password_hash(password)
+  
+  def verify_password(self, password):
+    return check_password_hash(self.password_hash, password)
 
   # Create A String
   def __repr__(self):
@@ -65,15 +79,15 @@ class Users(db.Model):
 
 # Create a User Form Class
 class AddUserForm(FlaskForm):
-  __bind_key__ = 'users'
-  user = StringField("User", validators=[DataRequired()])
+  name = StringField("Name", validators=[DataRequired()])
   email = StringField("Email", validators=[Email()])
+  password_hash = PasswordField("Password", validators=[DataRequired(), EqualTo('password_hash2', message='Passwords Must Match')])
+  password_hash2 = PasswordField("Confirm Password", validators=[DataRequired()])
   submit = SubmitField("Submit")
 
 # Create an User Update Form
 class UpdateUserForm(FlaskForm):
-  __bind_key__ = 'users'
-  user = StringField("Edit User", validators=[DataRequired()])
+  name = StringField("Edit Name", validators=[DataRequired()])
   email = StringField("Edit Email", validators=[Email()])
   submit = SubmitField("Submit")
 
@@ -83,6 +97,7 @@ def add_task():
   task = None
   description = None
   priority = None
+  due_date = None
 
   form = AddTaskForm()
   # Validate Form
@@ -90,13 +105,14 @@ def add_task():
     task = form.task.data
     description = form.description.data
     priority = form.priority.data
+    due_date = form.priority.data
 
-    new_task = Tasks(task=form.task.data, description=form.description.data, priority=form.priority.data)
+    new_task = Tasks(task=form.task.data, description=form.description.data, priority=form.priority.data, due_date=form.due_date.data)
     db.session.add(new_task)
     db.session.commit()
 
     flash("Task Added Successfully!")
-  our_tasks=Tasks.query.order_by(Tasks.date_added)
+  our_tasks=Tasks.query.order_by(Tasks.due_date)
   return render_template('task.html',
     task = task,
     form = form,
@@ -111,6 +127,7 @@ def task_update(id):
     task_to_update.task = request.form['task']
     task_to_update.description = request.form['description']
     task_to_update.priority = request.form['priority']
+    task_to_update.due_date = request.form['due_date']
     try:
       db.session.commit()
       flash('Task Updated Successfully!')
@@ -140,7 +157,7 @@ def task_delete(id):
     db.session.delete(task_to_delete)
     db.session.commit()
     flash("Task Deleted Successfully!")
-    our_tasks=Tasks.query.order_by(Tasks.date_added)
+    our_tasks=Tasks.query.order_by(Tasks.due_date)
     return render_template('task.html',
       task = task,
       form = form,
@@ -157,16 +174,25 @@ def task_delete(id):
 # Create User Page
 @app.route('/user/add', methods=['GET','POST'])
 def add_user():
-  user = None
+  name = None
   email = None
+  password_hash = None
 
   form = AddUserForm()
   # Validate Form
   if form.validate_on_submit():
-    user = form.user.data
+    name = form.name.data
     email = form.email.data
+    password_hash = form.password_hash.data
 
-    new_user = Users(user=user, email=email)
+    form.name.data = ''
+    form.email.data = ''
+    form.password_hash.data = ''
+
+    # Hash the password
+    hashed_pw = generate_password_hash(password_hash, method="pbkdf2")
+
+    new_user = Users(name=name, email=email, password_hash=hashed_pw)
     db.session.add(new_user)
     db.session.commit()
 
@@ -174,9 +200,10 @@ def add_user():
 
   our_users=Users.query.order_by(Users.date_added)
   return render_template('user.html',
-    user = user,
+    name = name,
     form = form,
     our_users=our_users)
+
 
 # Update Database Record
 @app.route('/user/update/<int:id>',methods=['GET','POST'])
@@ -184,31 +211,32 @@ def user_update(id):
   form = UpdateUserForm()
   user_to_update = Users.query.get_or_404(id)
   if request.method == "POST":
-    user_to_update.user = request.form['user']
+    user_to_update.name = request.form['name']
     user_to_update.email = request.form['email']
     try:
       db.session.commit()
       flash('User Updated Successfully!')
-      return render_template("update_user.html",
+      return render_template("edit_user.html",
         form=form,
         user_to_update=user_to_update)
     except:
       flash('Error! Looks like there was a problem... Try Again!')
-      return render_template("update_user.html",
+      return render_template("edit_user.html",
         form=form,
         user_to_update=user_to_update,
         id=id)
   else:
-    return render_template("update_user.html",
+    return render_template("edit_user.html",
         form=form,
         user_to_update=user_to_update,
         id=id)
+
 
 # Delete Database Record
 @app.route('/user/delete/<int:id>')
 def user_delete(id):
   user_to_delete = Users.query.get_or_404(id)
-  user = None
+  name = None
   form = AddUserForm()
 
   try:
@@ -217,14 +245,14 @@ def user_delete(id):
     flash("User Deleted Successfully!")
     our_users=Users.query.order_by(Users.date_added)
     return render_template('user.html',
-      user = user,
+      name = name,
       form = form,
       our_users=our_users)
 
   except:
-    flash("Whoops! There was a problem deleting task, try again...")
+    flash("Whoops! There was a problem deleting user, try again...")
     return render_template('user.html',
-      user = user,
+      name = name,
       form = form,
       our_users=our_users)
 

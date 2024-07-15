@@ -23,6 +23,7 @@
       <th>Task Name</th>
       <th>Task Description</th>
       <th>Priority</th>
+      <th>Due Date</th>
       <th>Delete</th>
     </tr>
   
@@ -33,6 +34,7 @@
       <td><a href="{{ url_for('task_update', id=id) }}"><strong>{{ tasks.task }}</strong></a> </td>
       <td>{{ tasks.description }}</td>
       <td>{{ tasks.priority }}</td>
+      <td>{{ tasks.due_date }}</td>
       <td><a href="{{ url_for('task_update', id=id) }}">🗑️</a> </td>
     </tr>
   
@@ -53,6 +55,11 @@
 
     {{ form.description.label(class="form-label") }}
     {{ form.description(class="form-control", value=task_to_update.description) }}
+    
+    <br/>
+
+    {{ form.due_date.label(class="form-label") }}
+    {{ form.due_date(class="form-control", value=task_to_update.due_date) }}
     
     <br/>
 

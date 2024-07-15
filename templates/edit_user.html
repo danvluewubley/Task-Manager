@@ -20,7 +20,7 @@
 
     <tr>
       <th>ID</th>
-      <th>User</th>
+      <th>Name</th>
       <th>Email</th>
       <th>Delete</th>
     </tr>
@@ -29,9 +29,9 @@
     
     <tr>
       <td>{{ users.id }}</td>
-      <td><a href="{{ url_for('update_user', id=id) }}"><strong>{{ users.user }}</strong></a> </td>
+      <td><a href="{{ url_for('user_date', id=our_users.id) }}"><strong>{{ users.name }}</strong></a> </td>
       <td>{{ users.email }}</td>
-      <td><a href="{{ url_for('update_user', id=id) }}">🗑️</a> </td>
+      <td><a href="{{ url_for('user_date', id=our_users.id) }}">🗑️</a></td>
     </tr>
   
     {% endfor %}
@@ -44,8 +44,8 @@
   <form action="/user/update/{{ user_to_update.id }}" method="POST">
     {{ form.hidden_tag() }}
 
-    {{ form.user.label(class="form-label") }}
-    {{ form.user(class="form-control", value=user_to_update.user) }}
+    {{ form.name.label(class="form-label") }}
+    {{ form.name(class="form-control", value=user_to_update.name) }}
     
     <br/>
 
